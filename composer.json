@@ -1,0 +1,55 @@
+{
+  "name": "connect24/connect24",
+  "description": "Official PHP client for the Connect24 communications API — email, SMS and WhatsApp.",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "sms",
+    "email",
+    "whatsapp",
+    "messaging-api",
+    "sms-api",
+    "south-africa",
+    "popia",
+    "connect24"
+  ],
+  "homepage": "https://connect24.co.za/developer",
+  "support": {
+    "email": "support@connect24.co.za",
+    "docs": "https://connect24.co.za/developer",
+    "issues": "https://github.com/Lihle2018/connect24-php/issues"
+  },
+  "authors": [
+    {
+      "name": "Connect24",
+      "homepage": "https://connect24.co.za"
+    }
+  ],
+  "require": {
+    "php": ">=8.1",
+    "ext-curl": "*",
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.5",
+    "phpstan/phpstan": "^1.11"
+  },
+  "autoload": {
+    "psr-4": {
+      "Connect24\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Connect24\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "analyse": "phpstan analyse src --level=6"
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "stable"
+}
