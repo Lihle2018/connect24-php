@@ -1,18 +1,34 @@
 name: Release
 
-# Packagist publishes by reading this repository, so there is nothing to upload — but a tag that
-# disagrees with what the code says is still worth catching before it becomes a version people
-# install.
+# Packagist publishes by reading this repository, so a release is a tag and nothing more.
+#
+#   Actions -> Release -> Run workflow -> type 0.2.0
+#   or: git tag v0.2.0 && git push origin v0.2.0
+#
+# composer.json deliberately carries no version field: Packagist takes the version from the tag,
+# which is what they recommend and what stops the two disagreeing.
 on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, without the leading v (e.g. 0.2.0)'
+        required: true
+        type: string
   push:
     tags: ['v*']
 
 jobs:
-  verify:
+  release:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -21,8 +37,32 @@ jobs:
           coverage: none
 
       - run: composer install --prefer-dist --no-progress
+
+      # Everything that would embarrass a release, before the tag exists rather than after.
       - run: composer test
       - run: composer analyse
+      - run: composer validate --strict
 
-      - name: Confirm the package is installable as tagged
-        run: composer validate --strict
+      - name: Tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          VERSION="${{ inputs.version }}"
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$'; then
+            echo "Not a version: $VERSION" >&2
+            exit 1
+          fi
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "v$VERSION already exists." >&2
+            exit 1
+          fi
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+
+      - name: Remind about the webhook
+        run: |
+          echo "Packagist picks this up within a minute IF the GitHub hook is connected."
+          echo "If it is not, the tag sits invisible for up to a week — connect Packagist to"
+          echo "GitHub once (Profile -> connect GitHub, then sync account) and it is permanent."
