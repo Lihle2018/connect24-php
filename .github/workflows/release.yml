@@ -1,0 +1,28 @@
+name: Release
+
+# Packagist publishes by reading this repository, so there is nothing to upload — but a tag that
+# disagrees with what the code says is still worth catching before it becomes a version people
+# install.
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: curl, json
+          coverage: none
+
+      - run: composer install --prefer-dist --no-progress
+      - run: composer test
+      - run: composer analyse
+
+      - name: Confirm the package is installable as tagged
+        run: composer validate --strict
