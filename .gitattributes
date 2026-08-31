@@ -1,0 +1,13 @@
+# Keeps the installed package to what it is for.
+#
+# Composer installs from a git archive, so without this every consumer's vendor/ carries our
+# tests, our CI config and our phpunit setup — files that cannot run there, are never read there,
+# and are downloaded on every deploy by every project that depends on us.
+#
+# Source is what ships: src/, the README, the licence and composer.json.
+
+/.github            export-ignore
+/tests              export-ignore
+/phpunit.xml        export-ignore
+/.gitattributes     export-ignore
+/.gitignore         export-ignore
