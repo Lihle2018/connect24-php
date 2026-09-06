@@ -35,3 +35,14 @@ jobs:
 
       - name: Static analysis
         run: composer analyse
+
+      # The samples are part of the contract: each ships with tests, and they must stay
+      # green with the SDK they sit on (the sample depends on this repo via a path repo).
+      - name: Sample lint
+        run: find samples -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Sample tests
+        working-directory: samples/order-notifications
+        run: |
+          composer install --prefer-dist --no-progress
+          composer test
